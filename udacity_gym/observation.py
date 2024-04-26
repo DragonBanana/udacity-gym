@@ -14,6 +14,7 @@ class UdacityObservation:
                  speed: float,
                  # TODO: manage episode metrics
                  cte: float,
+                 next_cte: float,
                  time: int,
                  ):
         self.input_image = input_image
@@ -23,7 +24,9 @@ class UdacityObservation:
         self.throttle = throttle
         self.speed = speed
         self.cte = cte
+        self.next_cte = next_cte
         self.time = time
+        print(self.get_metrics())
 
     def get_metrics(self):
         return {
@@ -33,5 +36,6 @@ class UdacityObservation:
             'steering_angle': self.steering_angle,
             'speed': self.speed,
             'cte': self.cte,
+            'next_cte': self.next_cte,
             'time': self.time,
         }

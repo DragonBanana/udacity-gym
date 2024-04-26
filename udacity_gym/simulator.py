@@ -75,6 +75,7 @@ class UdacitySimulator:
             throttle=0.0,
             speed=0.0,
             cte=0.0,
+            next_cte=0.0,
             time=-1
         )
         action = UdacityAction(

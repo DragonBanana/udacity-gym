@@ -76,6 +76,7 @@ class UdacityExecutor:
             throttle=float(data["throttle"]),
             speed=float(data["speed"]) * 3.6,  # conversion m/s to km/h
             cte=float(data["cte"]),
+            next_cte=float(data["next_cte"]),
             time=int(time.time() * 1000)
         )
         self.sim_state['observation'] = observation

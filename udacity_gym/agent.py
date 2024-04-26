@@ -46,7 +46,7 @@ class PIDUdacityAgent(UdacityAgent):
         self.total_error = 0.0
 
     def action(self, observation: UdacityObservation, *args, **kwargs):
-        error = observation.cte
+        error = (observation.next_cte + observation.cte) / 2
         diff_err = error - self.prev_error
 
         # Calculate steering angle
@@ -54,7 +54,7 @@ class PIDUdacityAgent(UdacityAgent):
         steering_angle = max(-1, min(steering_angle, 1))
 
         # Calculate throttle
-        throttle = 0.25 - (np.abs(error) * 0.1) * 0.55 if observation.speed < 100 else 0.0
+        throttle = 0.5
 
         # Save error for next prediction
         self.total_error += error
