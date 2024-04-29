@@ -1,0 +1,115 @@
+import pathlib
+from typing import Callable
+
+import numpy as np
+import pandas as pd
+import pygame
+import torch
+import torchvision
+
+from udacity_gym import UdacityObservation, UdacitySimulator
+from udacity_gym.logger import CustomLogger
+
+
+class AgentCallback:
+
+    def __init__(self, name: str, verbose: bool = False):
+        self.name = name
+        self.verbose = verbose
+        self.logger = CustomLogger(str(self.__class__))
+
+    def __call__(self, observation: UdacityObservation, *args, **kwargs):
+        if self.verbose:
+            self.logger.info(f"Activating callback {self.name}")
+
+
+class PauseSimulationCallback(AgentCallback):
+
+    def __init__(self, simulator: UdacitySimulator):
+        super().__init__('stop_simulation')
+        self.simulator = simulator
+
+    def __call__(self, observation: UdacityObservation, *args, **kwargs):
+        super().__call__(observation, *args, **kwargs)
+        self.simulator.pause()
+
+
+class ResumeSimulationCallback(AgentCallback):
+
+    def __init__(self, simulator: UdacitySimulator):
+        super().__init__('resume_simulation')
+        self.simulator = simulator
+
+    def __call__(self, observation: UdacityObservation, *args, **kwargs):
+        super().__call__(observation, *args, **kwargs)
+        self.simulator.resume()
+
+
+class LogObservationCallback(AgentCallback):
+
+    def __init__(self, path, enable_pygame_logging=False):
+        super().__init__('log_observation')
+        self.path = pathlib.Path(path)
+        self.path.mkdir(parents=True, exist_ok=True)
+        self.logs = []
+        self.logging_file = self.path.joinpath('log.csv')
+        self.enable_pygame_logging = enable_pygame_logging
+        if self.enable_pygame_logging:
+            pygame.init()
+            self.screen = pygame.display.set_mode((320, 160))
+            camera_surface = pygame.surface.Surface((320, 160), 0, 24).convert()
+            self.screen.blit(camera_surface, (0, 0))
+
+    def __call__(self, observation: UdacityObservation, *args, **kwargs):
+        super().__call__(observation, *args, **kwargs)
+        metrics = observation.get_metrics()
+
+        # TODO: need better folder management
+        image_name = f"frame_{observation.time:020d}.jpg"
+        torchvision.utils.save_image(
+            tensor=torchvision.transforms.ToTensor()(observation.input_image),
+            fp=self.path.joinpath(image_name)
+        )
+        metrics['input_image'] = image_name
+
+        # TODO: need better folder management
+        semantic_segmentation_filename = f"semantic_segmentation_{observation.time:020d}.jpg"
+        torchvision.utils.save_image(
+            tensor=torchvision.transforms.ToTensor()(observation.semantic_segmentation),
+            fp=self.path.joinpath(semantic_segmentation_filename)
+        )
+        metrics['semantic_segmentation_filename'] = semantic_segmentation_filename
+
+        if 'action' in kwargs.keys():
+            metrics['predicted_steering_angle'] = kwargs['action'].steering_angle
+            metrics['predicted_throttle'] = kwargs['action'].throttle
+        if 'shadow_action' in kwargs.keys():
+            metrics['shadow_predicted_steering_angle'] = kwargs['shadow_action'].steering_angle
+            metrics['shadow_predicted_throttle'] = kwargs['shadow_action'].throttle
+        self.logs.append(metrics)
+
+        if self.enable_pygame_logging:
+            pixel_array = np.swapaxes(observation.input_image, 0, 1)
+            new_surface = pygame.pixelcopy.make_surface(pixel_array)
+            self.screen.blit(new_surface, (0, 0))
+            pygame.display.flip()
+
+    def save(self):
+        logging_dataframe = pd.DataFrame(self.logs)
+        logging_dataframe = logging_dataframe.set_index('time', drop=True)
+        logging_dataframe.to_csv(self.logging_file)
+        if self.enable_pygame_logging:
+            pygame.quit()
+
+
+class TransformObservationCallback(AgentCallback):
+
+    def __init__(self, transformation: Callable):
+        super().__init__('transform_observation')
+        self.transformation = transformation
+
+    def __call__(self, observation: UdacityObservation, *args, **kwargs):
+        super().__call__(observation, *args, **kwargs)
+        augmented_image: torch.Tensor = self.transformation(observation.input_image)
+        image = torchvision.transforms.ToPILImage()(augmented_image.float())
+        observation.input_image = np.asarray(image)
