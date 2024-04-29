@@ -26,7 +26,6 @@ class UdacityObservation:
         self.cte = cte
         self.next_cte = next_cte
         self.time = time
-        print(self.get_metrics())
 
     def get_metrics(self):
         return {
