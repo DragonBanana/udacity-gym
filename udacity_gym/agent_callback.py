@@ -49,8 +49,12 @@ class LogObservationCallback(AgentCallback):
 
     def __init__(self, path, enable_pygame_logging=False):
         super().__init__('log_observation')
+        # Path initialization
         self.path = pathlib.Path(path)
-        self.path.mkdir(parents=True, exist_ok=True)
+        self.image_path = self.path.joinpath("image")
+        self.segmentation_path = self.path.joinpath("segmentation")
+        self.image_path.mkdir(parents=True, exist_ok=True)
+        self.segmentation_path.mkdir(parents=True, exist_ok=True)
         self.logs = []
         self.logging_file = self.path.joinpath('log.csv')
         self.enable_pygame_logging = enable_pygame_logging
@@ -65,20 +69,20 @@ class LogObservationCallback(AgentCallback):
         metrics = observation.get_metrics()
 
         # TODO: need better folder management
-        image_name = f"frame_{observation.time:020d}.jpg"
+        image_name = f"image_{observation.time:020d}.jpg"
         torchvision.utils.save_image(
             tensor=torchvision.transforms.ToTensor()(observation.input_image),
-            fp=self.path.joinpath(image_name)
+            fp=self.image_path.joinpath(image_name)
         )
-        metrics['input_image'] = image_name
+        metrics['image_filename'] = image_name
 
         # TODO: need better folder management
-        semantic_segmentation_filename = f"semantic_segmentation_{observation.time:020d}.jpg"
+        segmentation_name = f"segmentation_{observation.time:020d}.jpg"
         torchvision.utils.save_image(
             tensor=torchvision.transforms.ToTensor()(observation.semantic_segmentation),
-            fp=self.path.joinpath(semantic_segmentation_filename)
+            fp=self.segmentation_path.joinpath(segmentation_name)
         )
-        metrics['semantic_segmentation_filename'] = semantic_segmentation_filename
+        metrics['segmentation_filename'] = segmentation_name
 
         if 'action' in kwargs.keys():
             metrics['predicted_steering_angle'] = kwargs['action'].steering_angle
@@ -89,7 +93,7 @@ class LogObservationCallback(AgentCallback):
         self.logs.append(metrics)
 
         if self.enable_pygame_logging:
-            pixel_array = np.swapaxes(observation.input_image, 0, 1)
+            pixel_array = np.swapaxes(np.array(observation.input_image), 0, 1)
             new_surface = pygame.pixelcopy.make_surface(pixel_array)
             self.screen.blit(new_surface, (0, 0))
             pygame.display.flip()

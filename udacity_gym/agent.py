@@ -42,7 +42,7 @@ class UdacityAgent:
         action = self.action(observation, *args, **kwargs)
 
         for callback in self.after_action_callbacks:
-            callback(observation)
+            callback(observation, action=action)
 
         return action
 
@@ -66,7 +66,7 @@ class PIDUdacityAgent(UdacityAgent):
         steering_angle = max(-1, min(steering_angle, 1))
 
         # Calculate throttle
-        throttle = 0.5
+        throttle = 1
 
         # Save error for next prediction
         self.total_error += error

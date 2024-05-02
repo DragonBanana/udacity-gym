@@ -1,5 +1,10 @@
 # Udacity Gym Environment
 
+Install Python dependencies using pip:
+```shell
+pip3 install -r requirements.txt
+```
+
 ## Udacity Gym
 
 Create a Gym:

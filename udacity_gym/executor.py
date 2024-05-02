@@ -56,13 +56,13 @@ class UdacityExecutor:
         # self.logger.info(f"Received data from udacity client: {data}")
         # TODO: check data image, verify from sender that is not empty
         try:
-            input_image = np.array(Image.open(BytesIO(base64.b64decode(data["image"]))))
+            input_image = Image.open(BytesIO(base64.b64decode(data["image"])))
         except PIL.UnidentifiedImageError:
             print("Front facing camera image UnidentifiedImageError.")
             input_image = None
             # return
         try:
-            semantic_segmentation = np.array(Image.open(BytesIO(base64.b64decode(data["semantic_segmentation"]))))
+            semantic_segmentation = Image.open(BytesIO(base64.b64decode(data["semantic_segmentation"])))
         except PIL.UnidentifiedImageError:
             print("Segmentation camera image UnidentifiedImageError.")
             semantic_segmentation = None
@@ -72,8 +72,8 @@ class UdacityExecutor:
             input_image=input_image,
             semantic_segmentation=semantic_segmentation,
             position=(float(data["pos_x"]), float(data["pos_y"]), float(data["pos_z"])),
-            steering_angle=float(data["steering_angle"]) / 25,
-            throttle=float(data["throttle"]),
+            steering_angle=float(self.sim_state.get('action', None).steering_angle),
+            throttle=float(self.sim_state.get('action', None).throttle),
             speed=float(data["speed"]) * 3.6,  # conversion m/s to km/h
             cte=float(data["cte"]),
             next_cte=float(data["next_cte"]),

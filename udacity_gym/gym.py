@@ -67,6 +67,9 @@ class UdacityGym(gym.Env):
 
     def reset(self, **kwargs) -> tuple[UdacityObservation, dict[str, Any]]:
 
+        # TODO: make reset synchronous
+        # Returns only when the track has been set
+
         track = kwargs['track'] if 'track' in kwargs.keys() else 'lake'
         weather = kwargs['weather'] if 'weather' in kwargs.keys() else 'sunny'
         daytime = kwargs['daytime'] if 'daytime' in kwargs.keys() else 'day'
