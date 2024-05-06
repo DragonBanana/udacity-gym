@@ -13,6 +13,19 @@ if __name__ == '__main__':
     port = 4567
     simulator_exe_path = "/home/banana/projects/self-driving-car-sim/Builds/udacity_linux.x86_64"
 
+    # Creating the simulator wrapper
+    simulator = UdacitySimulator(
+        sim_exe_path=simulator_exe_path,
+        host=host,
+        port=port,
+    )
+
+    # Creating the gym environment
+    env = UdacityGym(
+        simulator=simulator,
+    )
+    simulator.start()
+
     # Track settings
     track = "lake"
     daytime = "day"
@@ -23,18 +36,6 @@ if __name__ == '__main__':
             ["sunny", "rainy", "snowy", "foggy"],
     ):
 
-        # Creating the simulator wrapper
-        simulator = UdacitySimulator(
-            sim_exe_path=simulator_exe_path,
-            host=host,
-            port=port,
-        )
-
-        # Creating the gym environment
-        env = UdacityGym(
-            simulator=simulator,
-        )
-        simulator.start()
         observation, _ = env.reset(track=f"{track}", weather=f"{weather}", daytime=f"{daytime}")
 
         # Wait for environment to set up
