@@ -21,7 +21,6 @@ class UdacityGym(gym.Env):
     def __init__(
             self,
             simulator,
-            track: str,
             max_steering: float = 1.0,
             max_throttle: float = 1.0,
             input_shape: Tuple[int, int, int] = (3, 160, 320),

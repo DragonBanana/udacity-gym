@@ -74,6 +74,8 @@ class UdacityExecutor:
             position=(float(data["pos_x"]), float(data["pos_y"]), float(data["pos_z"])),
             steering_angle=float(self.sim_state.get('action', None).steering_angle),
             throttle=float(self.sim_state.get('action', None).throttle),
+            # steering_angle=float(data["steering_angle"]) / 25,
+            # throttle=float(data["throttle"]),
             speed=float(data["speed"]) * 3.6,  # conversion m/s to km/h
             cte=float(data["cte"]),
             next_cte=float(data["next_cte"]),

@@ -4,6 +4,9 @@ import time
 from typing import Dict, Any, Callable
 import pandas as pd
 import numpy as np
+import torchvision
+
+from model.dave.dave_model import Dave2
 # import pygame
 # import torch
 # import torchvision
@@ -72,5 +75,26 @@ class PIDUdacityAgent(UdacityAgent):
         self.total_error += error
         self.total_error = self.total_error * 0.99
         self.prev_error = error
+
+        return UdacityAction(steering_angle=steering_angle, throttle=throttle)
+
+class DaveUdacityAgent(UdacityAgent):
+
+    def __init__(self, checkpoint_path, before_action_callbacks=None, after_action_callbacks=None):
+        super().__init__(before_action_callbacks, after_action_callbacks)
+        self.checkpoint_path = pathlib.Path(checkpoint_path)
+        self.model = Dave2.load_from_checkpoint(self.checkpoint_path)
+        # TODO: I probably need to check where the model is
+
+    def action(self, observation: UdacityObservation, *args, **kwargs):
+
+        # Cast input to right shape
+        # input_image = torchvision.transforms.functional.pil_to_tensor(observation.input_image)
+        input_image = torchvision.transforms.ToTensor()(observation.input_image)
+
+        # Calculate steering angle
+        steering_angle = self.model(input_image).item()
+        # Calculate throttle
+        throttle = 1
 
         return UdacityAction(steering_angle=steering_angle, throttle=throttle)

@@ -77,7 +77,7 @@ class LogObservationCallback(AgentCallback):
         metrics['image_filename'] = image_name
 
         # TODO: need better folder management
-        segmentation_name = f"segmentation_{observation.time:020d}.jpg"
+        segmentation_name = f"segmentation_{observation.time:020d}.png"
         torchvision.utils.save_image(
             tensor=torchvision.transforms.ToTensor()(observation.semantic_segmentation),
             fp=self.segmentation_path.joinpath(segmentation_name)

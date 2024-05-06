@@ -2,7 +2,7 @@ import pathlib
 import time
 import tqdm
 from udacity_gym import UdacitySimulator, UdacityGym, UdacityAction
-from udacity_gym.agent import PIDUdacityAgent
+from udacity_gym.agent import PIDUdacityAgent, DaveUdacityAgent
 from udacity_gym.agent_callback import LogObservationCallback
 
 if __name__ == '__main__':
@@ -11,11 +11,6 @@ if __name__ == '__main__':
     host = "127.0.0.1"
     port = 4567
     simulator_exe_path = "/home/banana/projects/self-driving-car-sim/Builds/udacity_linux.x86_64"
-
-    # Track settings
-    track = "lake"
-    daytime = "day"
-    weather = "sunny"
 
     # Creating the simulator wrapper
     simulator = UdacitySimulator(
@@ -27,28 +22,30 @@ if __name__ == '__main__':
     # Creating the gym environment
     env = UdacityGym(
         simulator=simulator,
+        track="lake",
     )
     simulator.start()
-    observation, _ = env.reset(track=f"{track}", weather=f"{weather}", daytime=f"{daytime}")
+    observation, _ = env.reset(track="lake")
 
-    # observation = env.observe()
     # Wait for environment to set up
     while not observation or not observation.is_ready():
         observation = env.observe()
         print("Waiting for environment to set up...")
         time.sleep(1)
 
-    log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset/{track}_{weather}_{daytime}"))
-    agent = PIDUdacityAgent(kp=0.07, kd=0.95, ki=0.000001,
+    log_observation_callback = LogObservationCallback(pathlib.Path("dataset2"))
+    agent = DaveUdacityAgent(checkpoint_path="dave2.ckpt",
                             before_action_callbacks=[],
                             after_action_callbacks=[log_observation_callback])
 
     # Interacting with the gym environment
-    for _ in tqdm.tqdm(range(6000)):
+    for _ in tqdm.tqdm(range(20000)):
         action = agent(observation)
         last_observation = observation
         observation, reward, terminated, truncated, info = env.step(action)
 
+        print(observation.get_metrics())
+        print(action.steering_angle)
         while observation.time == last_observation.time:
             observation = env.observe()
             time.sleep(0.005)
