@@ -53,6 +53,7 @@ class UdacityExecutor:
 
     def on_telemetry(self, data):
 
+        print(time.time())
         # self.logger.info(f"Received data from udacity client: {data}")
         # TODO: check data image, verify from sender that is not empty
         try:

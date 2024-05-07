@@ -62,6 +62,7 @@ if __name__ == '__main__':
                 time.sleep(0.005)
 
         log_observation_callback.save()
-        simulator.close()
-        env.close()
-        print("Experiment concluded.")
+
+    simulator.close()
+    env.close()
+    print("Experiment concluded.")

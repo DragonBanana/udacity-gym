@@ -31,14 +31,13 @@ if __name__ == '__main__':
     simulator.start()
     observation, _ = env.reset(track=f"{track}", weather=f"{weather}", daytime=f"{daytime}")
 
-    # observation = env.observe()
     # Wait for environment to set up
     while not observation or not observation.is_ready():
         observation = env.observe()
         print("Waiting for environment to set up...")
         time.sleep(1)
 
-    log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset/{track}_{weather}_{daytime}"))
+    log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset_2/{track}_{weather}_{daytime}"))
     agent = PIDUdacityAgent(kp=0.07, kd=0.95, ki=0.000001,
                             before_action_callbacks=[],
                             after_action_callbacks=[log_observation_callback])

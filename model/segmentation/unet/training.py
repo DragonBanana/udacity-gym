@@ -1,5 +1,6 @@
 import pathlib
 import lightning as pl
+import numpy as np
 import pandas as pd
 import torch
 import torchvision.transforms
@@ -8,13 +9,14 @@ from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 
 from torch.utils.data import Dataset, DataLoader
 
-from model.dave.dave_model import Dave2
+from model.lane_keeping.dave.dave_model import Dave2
+from model.segmentation.unet.unet_model import SegmentationUnet
 
 pl.seed_everything(42)
 torch.set_float32_matmul_precision('high')
 
 
-class DrivingDataset(Dataset):
+class SegmentationDataset(Dataset):
 
     def __init__(self, dataset_dir: str, split: str = "train"):
         self.dataset_dir = pathlib.Path(dataset_dir)
@@ -33,26 +35,29 @@ class DrivingDataset(Dataset):
 
     def __getitem__(self, idx):
         image = Image.open(self.dataset_dir.joinpath("image", self.metadata['image_filename'].values[idx]))
-        steering = self.metadata['predicted_steering_angle'].values[idx]
-        steering = torch.tensor([steering], dtype=torch.float32)
-        return self.transform(image), steering
+        segmentation = Image.open(self.dataset_dir.joinpath("segmentation", self.metadata['segmentation_filename'].values[idx]))
+        segmentation = np.array(segmentation)
+        segmentation = segmentation[:,:,2:] == 255
+        return self.transform(image), self.transform(segmentation).to(torch.float)
+        # return image, segmentation
 
 
 if __name__ == '__main__':
+
     # Run parameters
     input_shape = (3, 160, 320)
     max_epochs = 2000
     accelerator = "cpu"
     # devices = [0]
 
-    train_dataset = DrivingDataset(dataset_dir="../../dataset", split="train")
+    train_dataset = SegmentationDataset(dataset_dir="../../../udacity_dataset/lake_sunny_day", split="train")
     train_loader = DataLoader(
         train_dataset,
         batch_size=64,
         shuffle=True
     )
 
-    val_dataset = DrivingDataset(dataset_dir="../../dataset", split="val")
+    val_dataset = SegmentationDataset(dataset_dir="../../../dataset", split="val")
     val_loader = DataLoader(
         val_dataset,
         batch_size=64,
@@ -60,8 +65,7 @@ if __name__ == '__main__':
     )
 
     checkpoint_callback = ModelCheckpoint(
-        # dirpath=checkpoint_path.parent,
-        filename="dave2.ckpt",
+        filename="segmentation_unet.ckpt",
         monitor="val/loss",
         save_top_k=1,
         verbose=True,
@@ -71,10 +75,17 @@ if __name__ == '__main__':
         accelerator=accelerator,
         max_epochs=max_epochs,
         callbacks=[checkpoint_callback, earlystopping_callback],
-        # devices=devices,
     )
+    model_params = {
+        'hidden_dims': [32, 64, 128, 256],
+        'input_shape': (3, 160, 320),
+        'num_groups': 32,
+        'in_channels': 3,
+        'out_channels': 1,
+        'learning_rate': 1e-5,
+    }
 
-    driving_model = Dave2()
+    driving_model = SegmentationUnet(**model_params)
     trainer.fit(
         driving_model,
         train_dataloaders=train_loader,
