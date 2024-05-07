@@ -6,7 +6,7 @@ import torch
 import torchvision.transforms
 from PIL import Image
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
-
+import itertools
 from torch.utils.data import Dataset, DataLoader
 
 from model.lane_keeping.dave.dave_model import Dave2
@@ -23,9 +23,9 @@ class SegmentationDataset(Dataset):
         self.metadata = pd.read_csv(self.dataset_dir.joinpath('log.csv'))
         self.split = split
         if self.split == "train":
-            self.metadata = self.metadata[10: int(len(self.metadata) * 0.9)]
+            self.metadata = self.metadata[10: int(len(self.metadata) * 0.95)]
         else:
-            self.metadata = self.metadata[int(len(self.metadata) * 0.9):]
+            self.metadata = self.metadata[int(len(self.metadata) * 0.95):]
         self.transform = torchvision.transforms.Compose([
             torchvision.transforms.ToTensor()
         ])
@@ -39,7 +39,6 @@ class SegmentationDataset(Dataset):
         segmentation = np.array(segmentation)
         segmentation = segmentation[:,:,2:] == 255
         return self.transform(image), self.transform(segmentation).to(torch.float)
-        # return image, segmentation
 
 
 if __name__ == '__main__':
@@ -47,20 +46,31 @@ if __name__ == '__main__':
     # Run parameters
     input_shape = (3, 160, 320)
     max_epochs = 2000
-    accelerator = "cpu"
-    # devices = [0]
+    accelerator = "gpu"
+    devices = [1]
 
-    train_dataset = SegmentationDataset(dataset_dir="../../../udacity_dataset/lake_sunny_day", split="train")
+    train_dataset = []
+    val_dataset = []
+    for track, daytime, weather in itertools.product(
+            ["lake", "jungle", "mountain"],
+            ["day", "daynight"],
+            ["sunny", "rainy", "snowy", "foggy"],
+    ):
+        train_dataset.append(
+            SegmentationDataset(dataset_dir=f"../../../udacity_dataset/{track}_{weather}_{daytime}", split="train")
+        )
+        val_dataset.append(
+            SegmentationDataset(dataset_dir=f"../../../udacity_dataset/{track}_{weather}_{daytime}", split="val")
+        )
+
     train_loader = DataLoader(
-        train_dataset,
+        torch.utils.data.ConcatDataset(train_dataset),
         batch_size=64,
         shuffle=True
     )
-
-    val_dataset = SegmentationDataset(dataset_dir="../../../dataset", split="val")
     val_loader = DataLoader(
-        val_dataset,
-        batch_size=64,
+        torch.utils.data.ConcatDataset(val_dataset),
+        batch_size=16,
         shuffle=True
     )
 
@@ -75,6 +85,7 @@ if __name__ == '__main__':
         accelerator=accelerator,
         max_epochs=max_epochs,
         callbacks=[checkpoint_callback, earlystopping_callback],
+        devices=devices,
     )
     model_params = {
         'hidden_dims': [32, 64, 128, 256],

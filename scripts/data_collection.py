@@ -27,9 +27,6 @@ if __name__ == '__main__':
     simulator.start()
 
     # Track settings
-    track = "lake"
-    daytime = "day"
-    weather = "sunny"
     for track, daytime, weather in itertools.product(
             ["lake", "jungle", "mountain"],
             ["day", "daynight"],

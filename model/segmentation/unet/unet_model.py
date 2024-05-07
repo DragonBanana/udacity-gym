@@ -57,13 +57,13 @@ class SegmentationUnet(pl.LightningModule):
         x = self.positional_encoder(x)
         x = self.transformer(x, x)
         x = self.decoder(x)
-        return x
+        return (x + 1 / 2)
 
     def _step(self, batch, batch_idx, step: str = "train"):
         x, y = batch
-        x = self.forward(x)
+        y_hat = self.forward(x)
 
-        loss = torch.nn.functional.cross_entropy(x, y)
+        loss = torch.nn.functional.mse_loss(y, y_hat)
         self.log_dict(
             {
                 f'{step}/loss': loss

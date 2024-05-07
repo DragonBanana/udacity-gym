@@ -14,7 +14,8 @@ pygame
 torchvision>=0.18.0
 torch==2.3.0
 lightning==2.2.4
-torchinfo
+torchinfo==1.8.0
+torchmetrics==1.3.2
 
 # tensorflow==2.12.0
 # opencv-python==4.9.0.80
