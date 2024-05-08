@@ -70,18 +70,12 @@ class LogObservationCallback(AgentCallback):
 
         # TODO: need better folder management
         image_name = f"image_{observation.time:020d}.jpg"
-        torchvision.utils.save_image(
-            tensor=torchvision.transforms.ToTensor()(observation.input_image),
-            fp=self.image_path.joinpath(image_name)
-        )
+        observation.input_image.save(self.image_path.joinpath(image_name))
         metrics['image_filename'] = image_name
 
         # TODO: need better folder management
         segmentation_name = f"segmentation_{observation.time:020d}.png"
-        torchvision.utils.save_image(
-            tensor=torchvision.transforms.ToTensor()(observation.semantic_segmentation),
-            fp=self.segmentation_path.joinpath(segmentation_name)
-        )
+        observation.semantic_segmentation.save(self.image_path.joinpath(image_name))
         metrics['segmentation_filename'] = segmentation_name
 
         if 'action' in kwargs.keys():

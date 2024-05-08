@@ -1,6 +1,7 @@
 import base64
 import time
 from io import BytesIO
+from multiprocessing import Process
 from threading import Thread
 
 import PIL
@@ -48,7 +49,7 @@ class UdacityExecutor:
         from .simulator import simulator_state
         self.sim_state = simulator_state
         # Manage connection in separate thread
-        self.client_thread = Thread(target=self._start_server)
+        self.client_thread = Process(target=self._start_server)
         self.client_thread.daemon = True
 
     def on_telemetry(self, data):

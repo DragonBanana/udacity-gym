@@ -40,7 +40,8 @@ if __name__ == '__main__':
     log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset_2/{track}_{weather}_{daytime}"))
     agent = PIDUdacityAgent(kp=0.07, kd=0.95, ki=0.000001,
                             before_action_callbacks=[],
-                            after_action_callbacks=[log_observation_callback])
+                            after_action_callbacks=[log_observation_callback],
+                            )
 
     # Interacting with the gym environment
     for _ in tqdm.tqdm(range(6000)):
