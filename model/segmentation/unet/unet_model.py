@@ -6,6 +6,7 @@ from typing import Any, Optional
 import lightning as pl
 import torch
 import torchinfo
+import torchmetrics
 import torchvision
 from lightning.pytorch.callbacks import ModelCheckpoint, RichProgressBar
 from lightning.pytorch.loggers import WandbLogger
@@ -41,33 +42,35 @@ class SegmentationUnet(pl.LightningModule):
         self.dim = hidden_dims[-1]
         self.learning_rate = learning_rate
 
+        self._metric = torchmetrics.classification.BinaryJaccardIndex()
+
         self.encoder = UnetEncoder(hidden_dims=hidden_dims, num_groups=num_groups, in_channels=in_channels,
-                                    input_shape=input_shape)
+                                   input_shape=input_shape)
         self.positional_encoder = PositionalEncoder(dim=self.dim, seq_len=self.seq_len)
         self.transformer = nn.Transformer(d_model=self.dim,
-                                          nhead=16,
-                                          num_encoder_layers=12,
-                                          dim_feedforward=1536,
-                                          batch_first=True)
+                                          batch_first=True).encoder
         self.decoder = UnetDecoder(hidden_dims=hidden_dims[::-1], num_groups=num_groups,
-                                      out_channels=out_channels, input_shape=input_shape)
+                                   out_channels=out_channels, input_shape=input_shape)
 
     def forward(self, x, *args: Any, **kwargs: Any) -> Any:
         x = self.encoder(x)
         x = self.positional_encoder(x)
-        x = self.transformer(x, x)
+        x = self.transformer(x)
         x = self.decoder(x)
-        return (x + 1 / 2)
+        return x + 1 / 2
 
     def _step(self, batch, batch_idx, step: str = "train"):
         x, y = batch
         y_hat = self.forward(x)
 
-        loss = torch.nn.functional.mse_loss(y, y_hat)
+        loss = torch.nn.functional.mse_loss(y_hat, y)
+        loss_dict = {
+            f'{step}/loss': loss
+        }
+        if not self.training:
+            loss_dict[f'{step}/miou'] = self._metric(y_hat, y)
         self.log_dict(
-            {
-                f'{step}/loss': loss
-            },
+            loss_dict,
             prog_bar=True,
             on_step=self.training,
             on_epoch=not self.training
@@ -88,6 +91,7 @@ class SegmentationUnet(pl.LightningModule):
             'lr_scheduler': {'scheduler': scheduler, 'interval': 'epoch', 'frequency': 1}
         }
 
+
 if __name__ == '__main__':
     model_params = {
         'hidden_dims': [64, 128, 256, 512],
@@ -98,4 +102,5 @@ if __name__ == '__main__':
         'learning_rate': 1e-5,
     }
     model = SegmentationUnet(**model_params)
-    torchinfo.summary(model, (1, 3, 160, 320), col_names=["input_size", "output_size", "num_params", "mult_adds"], depth=5)
+    torchinfo.summary(model, (1, 3, 160, 320), col_names=["input_size", "output_size", "num_params", "mult_adds"],
+                      depth=5)
