@@ -48,7 +48,7 @@ class UdacityExecutor:
         # Simulator
         from .simulator import simulator_state
         self.sim_state = simulator_state
-        # Manage connection in separate thread
+        # Manage connection in separate process
         self.client_thread = Process(target=self._start_server)
         self.client_thread.daemon = True
 
