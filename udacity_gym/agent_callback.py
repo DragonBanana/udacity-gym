@@ -73,7 +73,7 @@ class LogObservationCallback(AgentCallback):
         metrics['image_filename'] = image_name
 
         segmentation_name = f"segmentation_{observation.time:020d}.png"
-        observation.semantic_segmentation.save(self.image_path.joinpath(image_name))
+        observation.semantic_segmentation.save(self.segmentation_path.joinpath(segmentation_name))
         metrics['segmentation_filename'] = segmentation_name
 
         if 'action' in kwargs.keys():
