@@ -61,13 +61,12 @@ class UdacityExecutor:
         except PIL.UnidentifiedImageError:
             print("Front facing camera image UnidentifiedImageError.")
             input_image = None
-            # return
+
         try:
             semantic_segmentation = Image.open(BytesIO(base64.b64decode(data["semantic_segmentation"])))
         except PIL.UnidentifiedImageError:
             print("Segmentation camera image UnidentifiedImageError.")
             semantic_segmentation = None
-            # return
 
         observation = UdacityObservation(
             input_image=input_image,
@@ -75,8 +74,8 @@ class UdacityExecutor:
             position=(float(data["pos_x"]), float(data["pos_y"]), float(data["pos_z"])),
             steering_angle=float(self.sim_state.get('action', None).steering_angle),
             throttle=float(self.sim_state.get('action', None).throttle),
-            # steering_angle=float(data["steering_angle"]) / 25,
-            # throttle=float(data["throttle"]),
+            lap=int(data['lap']),
+            sector=int(data['sector']),
             speed=float(data["speed"]) * 3.6,  # conversion m/s to km/h
             cte=float(data["cte"]),
             next_cte=float(data["next_cte"]),
