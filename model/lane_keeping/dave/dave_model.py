@@ -43,8 +43,8 @@ class Dave2(pl.LightningModule):
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int = 0):
         img, true = batch
-        out = self.forward(x=img)
-        loss = self.loss(out, true)
+        pred = self.forward(x=img)
+        loss = self.loss(pred, true)
         self.log("train/loss", loss, prog_bar=True, on_step=True)
         self.log("train/rmse", math.sqrt(loss), prog_bar=True, on_step=True)
         return loss
@@ -52,7 +52,7 @@ class Dave2(pl.LightningModule):
     def validation_step(self, batch: Tensor, batch_idx: int, dataloader_idx: int = 0):
         img, true = batch
         pred = self(img)
-        loss = self.loss(true, pred)
+        loss = self.loss(pred, true)
         self.log("val/loss", loss, prog_bar=True, on_epoch=True)
         self.log("val/rmse", math.sqrt(loss), prog_bar=True, on_epoch=True)
         return loss
@@ -60,7 +60,7 @@ class Dave2(pl.LightningModule):
     def test_step(self, batch: Tensor, batch_idx: int, dataloader_idx: int = 0):
         img, true = batch
         pred = self(img)
-        loss = self.loss(true, pred)
+        loss = self.loss(pred, true)
         self.log("test/loss", loss, prog_bar=True)
         self.log("test/rmse", math.sqrt(loss), prog_bar=True)
         return loss

@@ -57,8 +57,7 @@ class UnetEncoder(nn.Module):
 
         linear_projection_modules = []
         linear_projection_modules += [
-            nn.ReflectionPad2d(3),
-            nn.Conv2d(in_channels, hidden_dims[0], 7),
+            nn.Conv2d(in_channels, hidden_dims[0], 7, padding=3, padding_mode="reflect"),
             nn.GroupNorm(num_groups=num_groups, num_channels=hidden_dims[0], eps=1e-6, affine=True),
             nn.Conv2d(in_channels=hidden_dims[0], out_channels=hidden_dims[0], kernel_size=2, stride=2),
             nn.SiLU(inplace=True),
@@ -71,8 +70,6 @@ class UnetEncoder(nn.Module):
 
         self.linear_projection = nn.Sequential(*linear_projection_modules)
         self.flatten = nn.Flatten(2)
-
-        # self.linear = nn.Linear(self.hidden_dims[-1], 768)
 
     def forward(self, x: torch.Tensor):
         x = self.linear_projection(x)
@@ -105,9 +102,8 @@ class UnetDecoder(nn.Module):
             nn.Upsample(scale_factor=2),
             nn.GroupNorm(num_groups=num_groups, num_channels=hidden_dims[-1], eps=1e-6, affine=True),
             nn.Conv2d(in_channels=hidden_dims[-1], out_channels=hidden_dims[-1], kernel_size=3, stride=1, padding=1),
-            nn.ReflectionPad2d(3),
             nn.GroupNorm(num_groups=num_groups, num_channels=hidden_dims[-1], eps=1e-6, affine=True),
-            nn.Conv2d(hidden_dims[-1], out_channels, 7),
+            nn.Conv2d(hidden_dims[-1], out_channels, 7, padding=3, padding_mode="reflect"),
         ]
 
         if self.use_tanh:

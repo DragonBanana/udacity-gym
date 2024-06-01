@@ -10,7 +10,8 @@ from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 
 from torch.utils.data import Dataset, DataLoader
 
-from model.dave.dave_model import Dave2
+from model.lane_keeping.dave.dave_model import Dave2
+from utils.conf import ACCELERATOR, DEVICE, DEFAULT_DEVICE
 
 pl.seed_everything(42)
 torch.set_float32_matmul_precision('high')
@@ -56,17 +57,17 @@ if __name__ == '__main__':
     # Run parameters
     input_shape = (3, 160, 320)
     max_epochs = 2000
-    accelerator = "gpu"
-    devices = [1]
+    accelerator = ACCELERATOR
+    devices = [DEVICE]
 
-    train_dataset = DrivingDataset(dataset_dir="../../dataset", split="train")
+    train_dataset = DrivingDataset(dataset_dir="../../../dataset", split="train")
     train_loader = DataLoader(
         train_dataset,
         batch_size=256,
         shuffle=True
     )
 
-    val_dataset = DrivingDataset(dataset_dir="../../dataset", split="val", transform=torchvision.transforms.ToTensor())
+    val_dataset = DrivingDataset(dataset_dir="../../../dataset", split="val", transform=torchvision.transforms.ToTensor())
     val_loader = DataLoader(
         val_dataset,
         batch_size=64,

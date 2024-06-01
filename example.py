@@ -3,7 +3,7 @@ import time
 import tqdm
 from udacity_gym import UdacitySimulator, UdacityGym, UdacityAction
 from udacity_gym.agent import PIDUdacityAgent
-from udacity_gym.agent_callback import LogObservationCallback
+from udacity_gym.agent_callback import LogObservationCallback, PauseSimulationCallback, ResumeSimulationCallback
 
 if __name__ == '__main__':
 
@@ -37,14 +37,15 @@ if __name__ == '__main__':
         print("Waiting for environment to set up...")
         time.sleep(1)
 
-    log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset_2/{track}_{weather}_{daytime}"))
-    agent = PIDUdacityAgent(kp=0.07, kd=0.95, ki=0.000001,
-                            before_action_callbacks=[],
-                            after_action_callbacks=[log_observation_callback],
-                            )
+    log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset_7/{track}_{weather}_{daytime}"))
+    agent = PIDUdacityAgent(
+        kp=0.06, kd=0.8, ki=0.000001,
+        before_action_callbacks=[],
+        after_action_callbacks=[log_observation_callback],
+    )
 
     # Interacting with the gym environment
-    for _ in tqdm.tqdm(range(6000)):
+    for _ in tqdm.tqdm(range(2000)):
         action = agent(observation)
         last_observation = observation
         observation, reward, terminated, truncated, info = env.step(action)

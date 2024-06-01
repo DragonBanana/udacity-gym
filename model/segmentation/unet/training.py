@@ -11,9 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from model.lane_keeping.dave.dave_model import Dave2
 from model.segmentation.unet.unet_model import SegmentationUnet
-
-pl.seed_everything(42)
-torch.set_float32_matmul_precision('high')
+from utils.conf import ACCELERATOR, DEVICE, DEFAULT_DEVICE, CHECKPOINT_DIR
 
 
 class SegmentationDataset(Dataset):
@@ -23,7 +21,9 @@ class SegmentationDataset(Dataset):
         self.metadata = pd.read_csv(self.dataset_dir.joinpath('log.csv'))
         self.split = split
         if self.split == "train":
-            self.metadata = self.metadata[10: int(len(self.metadata) * 0.95)]
+            self.metadata = self.metadata[10: int(len(self.metadata) * 0.9)]
+        elif self.split == "val":
+            self.metadata = self.metadata[int(len(self.metadata) * 0.9):int(len(self.metadata) * 0.95)]
         else:
             self.metadata = self.metadata[int(len(self.metadata) * 0.95):]
         self.transform = torchvision.transforms.Compose([
@@ -43,18 +43,21 @@ class SegmentationDataset(Dataset):
 
 if __name__ == '__main__':
 
+    pl.seed_everything(42)
+    torch.set_float32_matmul_precision('high')
+
     # Run parameters
     input_shape = (3, 160, 320)
     max_epochs = 2000
-    accelerator = "gpu"
-    devices = [1]
+    accelerator = ACCELERATOR
+    devices = [DEVICE]
 
     train_dataset = []
     val_dataset = []
     for track, daytime, weather in itertools.product(
             ["lake", "jungle", "mountain"],
             ["day", "daynight"],
-            ["sunny", "rainy", "snowy", "foggy"],
+            ["sunny"],
     ):
         train_dataset.append(
             SegmentationDataset(dataset_dir=f"../../../udacity_dataset/{track}_{weather}_{daytime}", split="train")
@@ -71,11 +74,11 @@ if __name__ == '__main__':
     val_loader = DataLoader(
         torch.utils.data.ConcatDataset(val_dataset),
         batch_size=16,
-        shuffle=True
     )
 
     checkpoint_callback = ModelCheckpoint(
-        filename="segmentation_unet.ckpt",
+        dirpath=CHECKPOINT_DIR,
+        filename="segmentation_unet",
         monitor="val/loss",
         save_top_k=1,
         verbose=True,

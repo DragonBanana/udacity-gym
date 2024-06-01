@@ -15,6 +15,8 @@ class UdacityObservation:
                  speed: float,
                  cte: float,
                  next_cte: float,
+                 lap: int,
+                 sector: int,
                  time: int,
                  ):
         self.input_image = input_image
@@ -25,6 +27,8 @@ class UdacityObservation:
         self.speed = speed
         self.cte = cte
         self.next_cte = next_cte
+        self.lap = lap
+        self.sector = sector
         self.time = time
 
     def is_ready(self):
@@ -38,6 +42,8 @@ class UdacityObservation:
             'steering_angle': self.steering_angle,
             'speed': self.speed,
             'cte': self.cte,
+            'lap': self.lap,
+            'sector': self.sector,
             'next_cte': self.next_cte,
             'time': self.time,
         }

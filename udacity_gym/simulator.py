@@ -76,6 +76,8 @@ class UdacitySimulator:
             throttle=0.0,
             speed=0.0,
             cte=0.0,
+            lap=0,
+            sector=0,
             next_cte=0.0,
             time=-1
         )

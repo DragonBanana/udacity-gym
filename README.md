@@ -1,3 +1,6 @@
+# Udacity Simulator
+
+A copy of the simulator binary can be found on [Google Drive](https://drive.google.com/file/d/1OI2AVAJdxMzKv20G3sogP4zAQbNR8aGb/view?usp=sharing).
 # Udacity Gym Environment
 
 Install Python dependencies using pip:

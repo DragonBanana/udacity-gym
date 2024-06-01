@@ -54,8 +54,21 @@ class PIDUdacityAgent(UdacityAgent):
         self.prev_error = 0.0
         self.total_error = 0.0
 
+        self.curr_sector = 0
+        self.skip_frame = 4
+        self.curr_skip_frame = 0
+
     def action(self, observation: UdacityObservation, *args, **kwargs):
-        error = (observation.next_cte + observation.cte) / 2
+
+        if observation.sector != self.curr_sector:
+            if self.curr_skip_frame < self.skip_frame:
+                self.curr_skip_frame += 1
+            else:
+                self.curr_skip_frame = 0
+                self.curr_sector = observation.sector
+            error = observation.cte
+        else:
+            error = (observation.next_cte + observation.cte) / 2
         diff_err = error - self.prev_error
 
         # Calculate steering angle
