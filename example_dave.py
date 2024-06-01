@@ -38,9 +38,11 @@ if __name__ == '__main__':
         time.sleep(1)
 
     log_observation_callback = LogObservationCallback(pathlib.Path("dataset2"))
-    agent = DaveUdacityAgent(checkpoint_path="dave2.ckpt",
-                            before_action_callbacks=[],
-                            after_action_callbacks=[log_observation_callback])
+    agent = DaveUdacityAgent(
+        checkpoint_path="dave2.ckpt",
+        before_action_callbacks=[],
+        after_action_callbacks=[log_observation_callback]
+    )
 
     # Interacting with the gym environment
     for _ in tqdm.tqdm(range(20000)):
