@@ -26,7 +26,7 @@ class UdacityAgent:
             callback(observation)
 
     def on_transform_observation(self, observation: UdacityObservation):
-        for callback in self.after_action_callbacks:
+        for callback in self.transform_callbacks:
             observation = callback(observation)
         return observation
 
