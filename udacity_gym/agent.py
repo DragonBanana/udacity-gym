@@ -12,10 +12,10 @@ from .observation import UdacityObservation
 
 class UdacityAgent:
 
-    def __init__(self, before_action_callbacks=None, after_action_callbacks=None):
-        self.after_action_callbacks = after_action_callbacks
+    def __init__(self, before_action_callbacks=None, after_action_callbacks=None, transform_callbacks=None):
         self.before_action_callbacks = before_action_callbacks if before_action_callbacks is not None else []
         self.after_action_callbacks = after_action_callbacks if after_action_callbacks is not None else []
+        self.transform_callbacks = transform_callbacks if transform_callbacks is not None else []
 
     def on_before_action(self, observation: UdacityObservation):
         for callback in self.before_action_callbacks:
@@ -25,22 +25,21 @@ class UdacityAgent:
         for callback in self.after_action_callbacks:
             callback(observation)
 
+    def on_transform_observation(self, observation: UdacityObservation):
+        for callback in self.after_action_callbacks:
+            observation = callback(observation)
+        return observation
+
     def action(self, observation: UdacityObservation, *args, **kwargs):
         raise NotImplementedError('UdacityAgent does not implement __call__')
 
     def __call__(self, observation: UdacityObservation, *args, **kwargs):
-        # TODO: the image should never be none (by design)
         if observation.input_image is None:
             return UdacityAction(steering_angle=0.0, throttle=0.0)
-
-        for callback in self.before_action_callbacks:
-            callback(observation)
-
+        self.before_action_callbacks(observation)
+        observation = self.transform_callbacks(observation)
         action = self.action(observation, *args, **kwargs)
-
-        for callback in self.after_action_callbacks:
-            callback(observation, action=action)
-
+        self.after_action_callbacks(observation)
         return action
 
 
@@ -85,16 +84,16 @@ class PIDUdacityAgent(UdacityAgent):
 
         return UdacityAction(steering_angle=steering_angle, throttle=throttle)
 
+
 class DaveUdacityAgent(UdacityAgent):
 
-    def __init__(self, checkpoint_path, before_action_callbacks=None, after_action_callbacks=None):
-        super().__init__(before_action_callbacks, after_action_callbacks)
+    def __init__(self, checkpoint_path, before_action_callbacks=None, after_action_callbacks=None,
+                 transform_callbacks=None):
+        super().__init__(before_action_callbacks, after_action_callbacks, transform_callbacks)
         self.checkpoint_path = pathlib.Path(checkpoint_path)
         self.model = Dave2.load_from_checkpoint(self.checkpoint_path)
-        # TODO: I probably need to check where the model is
 
     def action(self, observation: UdacityObservation, *args, **kwargs):
-
         # Cast input to right shape
         # input_image = torchvision.transforms.functional.pil_to_tensor(observation.input_image)
         input_image = torchvision.transforms.ToTensor()(observation.input_image)
@@ -102,6 +101,6 @@ class DaveUdacityAgent(UdacityAgent):
         # Calculate steering angle
         steering_angle = self.model(input_image).item()
         # Calculate throttle
-        throttle = 1
+        throttle = 0.25 - 0.5 * abs(steering_angle)
 
         return UdacityAction(steering_angle=steering_angle, throttle=throttle)
