@@ -34,7 +34,7 @@ class UdacityAgent:
         raise NotImplementedError('UdacityAgent does not implement __call__')
 
     def __call__(self, observation: UdacityObservation, *args, **kwargs):
-        if observation.input_image is None:
+        if observation is None or observation.input_image is None:
             return UdacityAction(steering_angle=0.0, throttle=0.0)
         self.on_before_action(observation)
         observation = self.on_transform_observation(observation)
