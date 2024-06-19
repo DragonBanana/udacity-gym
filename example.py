@@ -48,7 +48,7 @@ if __name__ == '__main__':
     )
 
     # Interacting with the gym environment
-    for _ in tqdm.tqdm(range(10000)):
+    for _ in tqdm.tqdm(range(2000)):
         action = agent(observation)
         last_observation = observation
         observation, reward, terminated, truncated, info = env.step(action)
