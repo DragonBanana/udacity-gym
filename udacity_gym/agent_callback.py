@@ -106,6 +106,6 @@ class TransformObservationCallback(AgentCallback):
 
     def __call__(self, observation: UdacityObservation, *args, **kwargs):
         super().__call__(observation, *args, **kwargs)
-        augmented_image: torch.Tensor = self.transformation(observation.input_image)
+        augmented_image: torch.Tensor = self.transformation(observation.input_image, *args, **kwargs)
         image = torchvision.transforms.ToPILImage()(augmented_image.float())
         observation.input_image = np.asarray(image)
