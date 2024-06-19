@@ -96,7 +96,7 @@ class DaveUdacityAgent(UdacityAgent):
     def action(self, observation: UdacityObservation, *args, **kwargs):
 
         # Cast input to right shape
-        input_image = torchvision.transforms.ToTensor()(observation.input_image)
+        input_image = torchvision.transforms.ToTensor()(observation.input_image).to(self.model.device)
 
         # Calculate steering angle
         steering_angle = self.model(input_image).item()
