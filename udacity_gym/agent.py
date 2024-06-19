@@ -1,7 +1,7 @@
 import pathlib
 import torchvision
 
-from model.lane_keeping.dave.dave_model import Dave2
+from .extras.model.lane_keeping.dave.dave_model import Dave2
 # import pygame
 # import torch
 # import torchvision

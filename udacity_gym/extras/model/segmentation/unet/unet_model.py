@@ -1,20 +1,13 @@
-import datetime
-import itertools
-from contextlib import contextmanager, nullcontext
-from typing import Any, Optional
+from typing import Any
 
 import lightning as pl
 import torch
 import torchinfo
 import torchmetrics
-import torchvision
-from lightning.pytorch.callbacks import ModelCheckpoint, RichProgressBar
-from lightning.pytorch.loggers import WandbLogger
-from lightning.pytorch.utilities.types import STEP_OUTPUT, OptimizerLRScheduler
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import nn
-from torch.utils.data import DataLoader
 
-from model.segmentation.unet.module import UnetEncoder, UnetDecoder, PositionalEncoder
+from udacity_gym.extras.model.segmentation.unet.module import UnetEncoder, UnetDecoder, PositionalEncoder
 
 
 class SegmentationUnet(pl.LightningModule):
