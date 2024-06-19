@@ -29,16 +29,16 @@ setup(
     long_description=LONG_DESCRIPTION,
     packages=find_packages(),
     install_requires=[
-        'gymnasium==0.26.3',
+        'gymnasium==0.29.1',
         "Flask==2.0.0",
         "Flask-SocketIO==4.3.1",
         "python-engineio==3.13.2",
         "python-socketio==4.5.1",
         "eventlet==0.35.1",
-        "pandas==2.2.0",
+        "pandas==1.5.3",
         "Werkzeug==2.0.3",
         "pillow==10.2.0",
-        "tqdm"
+        "tqdm==4.66.4"
     ],  # add any additional packages that
     # needs to be installed along with your package. Eg: 'caer'
 
