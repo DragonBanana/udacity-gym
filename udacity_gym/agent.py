@@ -36,10 +36,10 @@ class UdacityAgent:
     def __call__(self, observation: UdacityObservation, *args, **kwargs):
         if observation.input_image is None:
             return UdacityAction(steering_angle=0.0, throttle=0.0)
-        self.before_action_callbacks(observation)
-        observation = self.transform_callbacks(observation)
+        self.on_before_action(observation)
+        observation = self.on_transform_observation(observation)
         action = self.action(observation, *args, **kwargs)
-        self.after_action_callbacks(observation)
+        self.on_after_action(observation)
         return action
 
 
