@@ -110,3 +110,5 @@ class TransformObservationCallback(AgentCallback):
                                                             mask=observation.semantic_segmentation, *args, **kwargs)
         image = torchvision.transforms.ToPILImage()(augmented_image.float())
         observation.input_image = np.asarray(image)
+
+        return observation

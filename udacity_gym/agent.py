@@ -34,7 +34,7 @@ class UdacityAgent:
         raise NotImplementedError('UdacityAgent does not implement __call__')
 
     def __call__(self, observation: UdacityObservation, *args, **kwargs):
-        if observation is None or observation.input_image is None:
+        if observation.input_image is None:
             return UdacityAction(steering_angle=0.0, throttle=0.0)
         self.on_before_action(observation)
         observation = self.on_transform_observation(observation)
@@ -94,9 +94,9 @@ class DaveUdacityAgent(UdacityAgent):
         self.model = Dave2.load_from_checkpoint(self.checkpoint_path)
 
     def action(self, observation: UdacityObservation, *args, **kwargs):
+
         # Cast input to right shape
-        # input_image = torchvision.transforms.functional.pil_to_tensor(observation.input_image)
-        input_image = torchvision.transforms.ToTensor()(observation.input_image)
+        input_image = torchvision.transforms.functional.pil_to_tensor(observation.input_image)
 
         # Calculate steering angle
         steering_angle = self.model(input_image).item()
