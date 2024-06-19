@@ -1,3 +1,4 @@
+import json
 import pathlib
 import time
 import tqdm
@@ -16,6 +17,8 @@ if __name__ == '__main__':
     track = "lake"
     daytime = "day"
     weather = "sunny"
+    log_directory = pathlib.Path(f"udacity_dataset_lake/{track}_{weather}_{daytime}")
+
 
     # Creating the simulator wrapper
     simulator = UdacitySimulator(
@@ -37,23 +40,25 @@ if __name__ == '__main__':
         print("Waiting for environment to set up...")
         time.sleep(1)
 
-    log_observation_callback = LogObservationCallback(pathlib.Path(f"udacity_dataset_7/{track}_{weather}_{daytime}"))
+    log_observation_callback = LogObservationCallback(log_directory)
     agent = PIDUdacityAgent(
-        kp=0.06, kd=0.8, ki=0.000001,
+        kp=0.05, kd=0.8, ki=0.000001,
         before_action_callbacks=[],
         after_action_callbacks=[log_observation_callback],
     )
 
     # Interacting with the gym environment
-    for _ in tqdm.tqdm(range(2000)):
+    for _ in tqdm.tqdm(range(10000)):
         action = agent(observation)
         last_observation = observation
         observation, reward, terminated, truncated, info = env.step(action)
 
         while observation.time == last_observation.time:
             observation = env.observe()
-            time.sleep(0.005)
+            time.sleep(0.0025)
 
+    if info:
+        json.dump(info, open(log_directory.joinpath("info.json"), "w"))
     log_observation_callback.save()
     simulator.close()
     env.close()
