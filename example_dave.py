@@ -47,7 +47,7 @@ if __name__ == '__main__':
     )
 
     # Interacting with the gym environment
-    for _ in tqdm.tqdm(range(5000)):
+    for _ in tqdm.tqdm(range(500)):
         action = agent(observation)
         last_observation = observation
         observation, reward, terminated, truncated, info = env.step(action)
@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     if info:
         json.dump(info, open(log_directory.joinpath("info.json"), "w"))
+
     log_observation_callback.save()
     simulator.close()
     env.close()

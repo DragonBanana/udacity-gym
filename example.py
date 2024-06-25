@@ -59,6 +59,7 @@ if __name__ == '__main__':
 
     if info:
         json.dump(info, open(log_directory.joinpath("info.json"), "w"))
+
     log_observation_callback.save()
     simulator.close()
     env.close()
