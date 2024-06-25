@@ -120,7 +120,11 @@ class UdacityExecutor:
 
     def on_episode_events(self, data):
         self.logger.info(f"episode events {data}")
-        self.sim_state['events'].append(data)
+        self.sim_state['events'] += [data]
+
+    def on_episode_event(self, data):
+        self.logger.info(f"episode event {data}")
+        self.sim_state['events'] += [data]
 
     def send_control(self) -> None:
         # self.logger.info(f"Sending control")
