@@ -17,17 +17,17 @@ class UdacityAgent:
         self.after_action_callbacks = after_action_callbacks if after_action_callbacks is not None else []
         self.transform_callbacks = transform_callbacks if transform_callbacks is not None else []
 
-    def on_before_action(self, observation: UdacityObservation):
+    def on_before_action(self, observation: UdacityObservation, *args, **kwargs):
         for callback in self.before_action_callbacks:
-            callback(observation)
+            callback(observation, *args, **kwargs)
 
-    def on_after_action(self, observation: UdacityObservation):
+    def on_after_action(self, observation: UdacityObservation, *args, **kwargs):
         for callback in self.after_action_callbacks:
-            callback(observation)
+            callback(observation, *args, **kwargs)
 
-    def on_transform_observation(self, observation: UdacityObservation):
+    def on_transform_observation(self, observation: UdacityObservation, *args, **kwargs):
         for callback in self.transform_callbacks:
-            observation = callback(observation)
+            observation = callback(observation, *args, **kwargs)
         return observation
 
     def action(self, observation: UdacityObservation, *args, **kwargs):
@@ -39,7 +39,7 @@ class UdacityAgent:
         self.on_before_action(observation)
         observation = self.on_transform_observation(observation)
         action = self.action(observation, *args, **kwargs)
-        self.on_after_action(observation)
+        self.on_after_action(observation, action=action)
         return action
 
 
