@@ -1,12 +1,14 @@
 import pathlib
 import torchvision
 
+from .extras.model.lane_keeping.chauffeur.chauffeur_model import Chauffeur
 from .extras.model.lane_keeping.dave.dave_model import Dave2
 # import pygame
 # import torch
 # import torchvision
 
 from .action import UdacityAction
+from .extras.model.lane_keeping.epoch.epoch_model import Epoch
 from .observation import UdacityObservation
 
 
@@ -81,6 +83,31 @@ class PIDUdacityAgent(UdacityAgent):
         self.total_error += error
         self.total_error = self.total_error * 0.99
         self.prev_error = error
+
+        return UdacityAction(steering_angle=steering_angle, throttle=throttle)
+
+class EndToEndLaneKeepingAgent(UdacityAgent):
+
+    def __init__(self, model_name, checkpoint_path, before_action_callbacks=None, after_action_callbacks=None,
+                 transform_callbacks=None):
+        super().__init__(before_action_callbacks, after_action_callbacks, transform_callbacks)
+        self.checkpoint_path = pathlib.Path(checkpoint_path)
+        if model_name == "dave2":
+            self.model = Dave2.load_from_checkpoint(self.checkpoint_path)
+        if model_name == "epoch":
+            self.model = Epoch.load_from_checkpoint(self.checkpoint_path)
+        if model_name == "chauffeur":
+            self.model = Chauffeur.load_from_checkpoint(self.checkpoint_path)
+
+    def action(self, observation: UdacityObservation, *args, **kwargs):
+
+        # Cast input to right shape
+        input_image = torchvision.transforms.ToTensor()(observation.input_image).to(self.model.device)
+
+        # Calculate steering angle
+        steering_angle = self.model(input_image).item()
+        # Calculate throttle
+        throttle = 0.2 - 0.5 * abs(steering_angle)
 
         return UdacityAction(steering_angle=steering_angle, throttle=throttle)
 
