@@ -35,14 +35,14 @@ class SegmentationUnet(pl.LightningModule):
         self.dim = hidden_dims[-1]
         self.learning_rate = learning_rate
 
-        self._metric = torchmetrics.classification.BinaryJaccardIndex()
+        self.miou_metric = torchmetrics.classification.BinaryJaccardIndex()
 
         self.encoder = UnetEncoder(hidden_dims=hidden_dims, num_groups=num_groups, in_channels=in_channels,
                                    input_shape=input_shape)
         self.positional_encoder = PositionalEncoder(dim=self.dim, seq_len=self.seq_len)
         self.transformer = nn.Transformer(d_model=self.dim,
                                           batch_first=True).encoder
-        self.decoder = UnetDecoder(hidden_dims=hidden_dims[::-1], num_groups=num_groups,
+        self.decoder = UnetDecoder(hidden_dims=hidden_dims[::-1], num_groups=num_groups, use_tanh=True,
                                    out_channels=out_channels, input_shape=input_shape)
 
     def forward(self, x, *args: Any, **kwargs: Any) -> Any:
@@ -50,18 +50,18 @@ class SegmentationUnet(pl.LightningModule):
         x = self.positional_encoder(x)
         x = self.transformer(x)
         x = self.decoder(x)
-        return x + 1 / 2
+        return (x + 1) / 2
 
     def _step(self, batch, batch_idx, step: str = "train"):
         x, y = batch
         y_hat = self.forward(x)
 
-        loss = torch.nn.functional.mse_loss(y_hat, y)
+        loss = torch.nn.functional.binary_cross_entropy(y_hat, y)
         loss_dict = {
-            f'{step}/loss': loss
+            f'{step}_loss': loss
         }
         if not self.training:
-            loss_dict[f'{step}/miou'] = self._metric(y_hat, y)
+            loss_dict[f'{step}_mIoU'] = self.miou_metric(y_hat, y)
         self.log_dict(
             loss_dict,
             prog_bar=True,

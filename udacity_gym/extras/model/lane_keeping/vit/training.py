@@ -9,7 +9,6 @@ from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 
 from torch.utils.data import Dataset, DataLoader
 
-from model.lane_keeping.epoch.epoch_model import Epoch
 from utils.conf import ACCELERATOR, DEVICE, DEFAULT_DEVICE, CHECKPOINT_DIR, PROJECT_DIR
 
 from udacity_gym.extras.model.lane_keeping.vit.vit_model import ViT

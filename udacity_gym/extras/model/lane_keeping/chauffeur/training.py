@@ -9,7 +9,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 
 from torch.utils.data import Dataset, DataLoader
 
-from model.lane_keeping.chauffeur.chauffeur_model import Chauffeur
+from udacity_gym.extras.model.lane_keeping.chauffeur.chauffeur_model import Chauffeur
 from utils.conf import ACCELERATOR, DEVICE, DEFAULT_DEVICE, CHECKPOINT_DIR, PROJECT_DIR
 
 pl.seed_everything(42)
