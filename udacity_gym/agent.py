@@ -9,6 +9,7 @@ from .extras.model.lane_keeping.dave.dave_model import Dave2
 
 from .action import UdacityAction
 from .extras.model.lane_keeping.epoch.epoch_model import Epoch
+from .extras.model.lane_keeping.vit.vit_model import ViT
 from .observation import UdacityObservation
 
 
@@ -98,6 +99,8 @@ class EndToEndLaneKeepingAgent(UdacityAgent):
             self.model = Epoch.load_from_checkpoint(self.checkpoint_path)
         if model_name == "chauffeur":
             self.model = Chauffeur.load_from_checkpoint(self.checkpoint_path)
+        if model_name == "vit":
+            self.model = ViT.load_from_checkpoint(self.checkpoint_path)
 
     def action(self, observation: UdacityObservation, *args, **kwargs):
 
@@ -107,7 +110,7 @@ class EndToEndLaneKeepingAgent(UdacityAgent):
         # Calculate steering angle
         steering_angle = self.model(input_image).item()
         # Calculate throttle
-        throttle = 0.2 - 0.5 * abs(steering_angle)
+        throttle = 0.22 - 0.5 * abs(steering_angle)
 
         return UdacityAction(steering_angle=steering_angle, throttle=throttle)
 
