@@ -21,7 +21,7 @@ class ViT(pl.LightningModule):
         self.loss = torch.nn.MSELoss()
 
     def forward(self, x: Tensor):
-        return self.model(torchvision.transforms.functional.resize(x, (160,160)))
+        return self.model(torchvision.transforms.functional.resize(x, (160,160)).unsqueeze(0)).squeeze(0)
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int = 0):
         img, true = batch
