@@ -72,7 +72,7 @@ if __name__ == '__main__':
     ])
     train_loader = DataLoader(
         train_dataset,
-        batch_size=256,
+        batch_size=16,
         shuffle=True,
         prefetch_factor=4,
         num_workers=16,
@@ -84,15 +84,14 @@ if __name__ == '__main__':
     ])
     val_loader = DataLoader(
         val_dataset,
-        batch_size=64,
-        shuffle=True,
+        batch_size=4,
         prefetch_factor=2,
         num_workers=8,
     )
 
     checkpoint_callback = ModelCheckpoint(
-        dirpath=CHECKPOINT_DIR.joinpath("lane_keeping", "epoch"),
-        filename="epoch",
+        dirpath=CHECKPOINT_DIR.joinpath("lane_keeping", "vit"),
+        filename="vit",
         monitor="val/loss",
         save_top_k=1,
         mode="min",
@@ -111,5 +110,4 @@ if __name__ == '__main__':
         driving_model,
         train_dataloaders=train_loader,
         val_dataloaders=val_loader,
-        # ckpt_path="/media/banana/data/models/udacity-gym/lane_keeping/dave2/dave2-v3.ckpt",
     )

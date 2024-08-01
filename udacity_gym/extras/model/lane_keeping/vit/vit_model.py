@@ -1,4 +1,5 @@
 import math
+import torchvision.utils
 from typing import Tuple
 import lightning as pl
 import torch
@@ -15,12 +16,12 @@ class ViT(pl.LightningModule):
         super().__init__()
         self.learning_rate = learning_rate
         self.input_shape = input_shape
-        self.example_input_array = torch.zeros(size=self.input_shape)
-        self.model = VisionTransformer(image_size=(input_shape[1], input_shape[2]), patch_size=16, num_classes=1)
+        # self.example_input_array = torch.zeros(size=self.input_shape)
+        self.model = VisionTransformer(image_size=160, patch_size=8, num_classes=1, num_layers=2, num_heads=2, hidden_dim=512, mlp_dim=128)
         self.loss = torch.nn.MSELoss()
 
     def forward(self, x: Tensor):
-        return self.model(x)
+        return self.model(torchvision.transforms.functional.resize(x, (160,160)))
 
     def training_step(self, batch: Tuple[Tensor, Tensor], batch_idx: int = 0):
         img, true = batch
