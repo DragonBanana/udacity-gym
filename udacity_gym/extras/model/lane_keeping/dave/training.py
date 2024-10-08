@@ -34,7 +34,7 @@ class DrivingDataset(Dataset):
             self.metadata = self.metadata[int(len(self.metadata) * 0.9):]
         if transform == None:
             self.transform = torchvision.transforms.Compose([
-                torchvision.transforms.AugMix(),
+                # torchvision.transforms.AugMix(),
                 torchvision.transforms.ToTensor(),
             ])
         else:
@@ -71,10 +71,10 @@ if __name__ == '__main__':
     ])
     train_loader = DataLoader(
         train_dataset,
-        batch_size=256,
+        batch_size=64,
         shuffle=True,
         prefetch_factor=4,
-        num_workers=16,
+        num_workers=8,
     )
 
     val_dataset = torch.utils.data.ConcatDataset([
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         batch_size=64,
         shuffle=True,
         prefetch_factor=2,
-        num_workers=8,
+        num_workers=4,
     )
 
     checkpoint_callback = ModelCheckpoint(
