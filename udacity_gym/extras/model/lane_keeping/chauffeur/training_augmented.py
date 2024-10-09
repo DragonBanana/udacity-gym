@@ -11,7 +11,9 @@ from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 
 from torch.utils.data import Dataset, DataLoader
 
+from udacity_gym.extras.model.lane_keeping.chauffeur.chauffeur_model import Chauffeur
 from udacity_gym.extras.model.lane_keeping.dave.dave_model import Dave2
+from udacity_gym.extras.model.lane_keeping.epoch.epoch_model import Epoch
 from utils.conf import ACCELERATOR, DEVICE, DEFAULT_DEVICE, CHECKPOINT_DIR, PROJECT_DIR
 
 pl.seed_everything(42)
@@ -110,8 +112,8 @@ if __name__ == '__main__':
             train_dataset,
             batch_size=256,
             shuffle=True,
-            prefetch_factor=8,
-            num_workers=32,
+            prefetch_factor=4,
+            num_workers=16,
         )
 
         val_dataset = torch.utils.data.ConcatDataset([
@@ -124,12 +126,12 @@ if __name__ == '__main__':
             batch_size=64,
             shuffle=True,
             prefetch_factor=2,
-            num_workers=16,
+            num_workers=8,
         )
 
         checkpoint_callback = ModelCheckpoint(
-            dirpath=CHECKPOINT_DIR.joinpath("lane_keeping", "dave2"),
-            filename=f"dave2_{approach}",
+            dirpath=CHECKPOINT_DIR.joinpath("lane_keeping", "chauffeur"),
+            filename=f"chauffeur_{approach}",
             monitor="val/loss",
             save_top_k=1,
             mode="min",
@@ -142,11 +144,10 @@ if __name__ == '__main__':
             callbacks=[checkpoint_callback, earlystopping_callback],
             devices=devices,
         )
-
-        driving_model = Dave2()
+    
+        driving_model = Chauffeur()
         trainer.fit(
             driving_model,
             train_dataloaders=train_loader,
             val_dataloaders=val_loader,
-            # ckpt_path="/media/banana/data/models/udacity-gym/lane_keeping/dave2/dave2-v6.ckpt",
         )

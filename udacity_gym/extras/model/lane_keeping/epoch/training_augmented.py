@@ -1,5 +1,7 @@
 import pathlib
 import random
+from functools import cache
+
 import lightning as pl
 import pandas as pd
 import torch
@@ -44,8 +46,12 @@ class DrivingDataset(Dataset):
     def __len__(self):
         return len(self.metadata)
 
+    @cache
+    def get_image(self, idx):
+        return Image.open(self.dataset_dir.joinpath("image", self.metadata['image_filename'].values[idx]))
+
     def __getitem__(self, idx):
-        image = Image.open(self.dataset_dir.joinpath("image", self.metadata['image_filename'].values[idx]))
+        image = self.get_image(idx)
         steering = self.metadata['predicted_steering_angle'].values[idx]
         steering = torch.tensor([steering], dtype=torch.float32)
         if self.split == "train":
@@ -68,8 +74,12 @@ class AugmentedDrivingDataset(Dataset):
     def __len__(self):
         return len(self.metadata)
 
+    @cache
+    def get_image(self, idx):
+        return Image.open(self.dataset_dir.joinpath("image", self.metadata['image_filename'].values[idx]))
+
     def __getitem__(self, idx):
-        image = Image.open(self.dataset_dir.joinpath("image", self.metadata['image_filename'].values[idx]))
+        image = self.get_image(idx)
         steering = self.metadata['predicted_steering_angle'].values[idx]
         steering = torch.tensor([steering], dtype=torch.float32)
         image, steering = random_flip(image, steering)
