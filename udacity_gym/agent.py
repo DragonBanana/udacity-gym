@@ -131,6 +131,6 @@ class DaveUdacityAgent(UdacityAgent):
         # Calculate steering angle
         steering_angle = self.model(input_image).item()
         # Calculate throttle
-        throttle = 0.25 - 0.5 * abs(steering_angle)
+        throttle = 0.22 - 0.5 * abs(steering_angle)
 
         return UdacityAction(steering_angle=steering_angle, throttle=throttle)

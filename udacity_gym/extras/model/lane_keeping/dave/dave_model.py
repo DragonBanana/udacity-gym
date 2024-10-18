@@ -29,11 +29,11 @@ class Dave2(pl.LightningModule):
             torch.nn.ReLU(),
             torch.nn.Flatten(start_dim=-3, end_dim=-1),
             torch.nn.Linear(in_features=flat_shape, out_features=100),
-            torch.nn.Dropout(p=0.5),
+            torch.nn.Dropout(p=0.05),
             torch.nn.Linear(in_features=100, out_features=50),
-            torch.nn.Dropout(p=0.5),
+            torch.nn.Dropout(p=0.05),
             torch.nn.Linear(in_features=50, out_features=10),
-            torch.nn.Dropout(p=0.5),
+            torch.nn.Dropout(p=0.05),
             torch.nn.Linear(in_features=10, out_features=1)
         )
         self.loss = torch.nn.MSELoss()

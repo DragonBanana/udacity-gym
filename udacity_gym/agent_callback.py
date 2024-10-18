@@ -72,9 +72,10 @@ class LogObservationCallback(AgentCallback):
         observation.input_image.save(self.image_path.joinpath(image_name))
         metrics['image_filename'] = image_name
 
-        segmentation_name = f"segmentation_{observation.time:020d}.png"
-        observation.semantic_segmentation.save(self.segmentation_path.joinpath(segmentation_name))
-        metrics['segmentation_filename'] = segmentation_name
+        if observation.semantic_segmentation is not None:
+            segmentation_name = f"segmentation_{observation.time:020d}.png"
+            observation.semantic_segmentation.save(self.segmentation_path.joinpath(segmentation_name))
+            metrics['segmentation_filename'] = segmentation_name
 
         if 'action' in kwargs.keys():
             metrics['predicted_steering_angle'] = kwargs['action'].steering_angle
